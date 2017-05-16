@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<beans 
+	xmlns="http://www.springframework.org/schema/beans"  
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:context="http://www.springframework.org/schema/context"  
+	xmlns:util="http://www.springframework.org/schema/util" 
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xmlns:ws="http://www.springframework.org/schema/web-services"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+		http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+		http://www.springframework.org/schema/web-services http://www.springframework.org/schema/web-services/web-services.xsd">  
+ 
+	 
+	<context:component-scan base-package="com.joyousasia.dao*" />
+	<jpa:repositories base-package="com.joyousasia.dao.cms" />
+	<context:component-scan base-package="com.joyousasia.service*" />
+	<context:component-scan base-package="com.joyousasia.form.controller*" />
+	<context:component-scan base-package="com.joyousasia.common" />
+	<context:component-scan base-package="com.joyousasia.pdf" />
+	<context:property-placeholder location="classpath:config.properties" />
+ 
+	<mvc:annotation-driven/>
+	<tx:annotation-driven transaction-manager="transactionManager"/>
+ 
+	<!--Spring data -->
+ 
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">  
+		<property name="driverClassName" value="${database.driver}" />  
+		<property name="url" value="${database.url}" />  
+		<property name="username" value="${database.user}" />  
+		<property name="password" value="${database.password}" />  
+	</bean>
+ 	
+ 	<!-- Necessary to get the entity manager injected into the factory bean -->
+ 	<bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
+ 	
+  	<!-- Entity Manager Factory -->
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+    	<property name="persistenceUnitName" value="jcgPersistence" />
+        <property name="dataSource" ref="dataSource" />
+        <property name="jpaVendorAdapter" ref="jpaVendorAdapter" />
+        <property name="jpaDialect" ref="jpaDialect" />
+        <property name="jpaProperties">
+        	<props>
+            	<prop key="hibernate.hbm2ddl.auto">${hibernate.hbm2ddl.auto}</prop>
+            	<prop key="hibernate.dialect">${hibernate.dialect}</prop>
+        	</props>
+       </property>
+       <property name="packagesToScan" value="com.joyousasia.model"/>
+    </bean>
+    
+    <!-- Define EclipseLink JPA Vendor Adapter -->
+    <bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+       <property name="showSql" value="true"/>
+       <property name="generateDdl" value="true"/>
+       <property name="database" value="MYSQL"/>
+    </bean>
+    
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory" />
+    </bean>
+  
+	<bean id="persistenceExceptionTranslationPostProcessor" class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />  
+ 	
+ 	<!-- Json Converter -->
+	<bean id="jacksonMessageConverter" class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+		<property name="supportedMediaTypes" value="application/json" />
+	</bean>
+	
+	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+	    <property name="messageConverters">
+			<list>
+	        	<ref bean="jacksonMessageConverter"/>
+			</list>
+	    </property>
+	</bean>
+	
+	<!-- servlet -->
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+	    <property name="prefix" value="/WEB-INF/views/"/>
+	    <property name="suffix" value=".jsp"/> 
+	    <property name="redirectHttp10Compatible" value="false" />
+	</bean>  
+  
+	<!--Spring message -->
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basename" value="i18n/messages"/>
+	    <property name="useCodeAsDefaultMessage" value="true"/>
+	    <property name="defaultEncoding" value="UTF-8" />
+	</bean>
+	<mvc:interceptors>
+		<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
+			<property name="paramName" value="locale" />
+		</bean>
+	</mvc:interceptors>
+	<bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver"/>
+  
+	<!--LoadPic Setting-->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		 <!-- setting maximum upload size -->
+		 <property name="maxUploadSize" value="2048000" />
+	</bean>
+</beans>  
