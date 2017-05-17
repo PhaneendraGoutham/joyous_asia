@@ -57,9 +57,6 @@ $(document)
 							success : function(data) {
 								
 								alertNotification(data);
-//								facultyTable.ajax.reload( function () {
-									load_status_toggle();
-//								});
 								
 							}
 						});
@@ -76,9 +73,7 @@ $(document)
 							success : function(data) {
 								
 								alertNotification(data);
-//								facultyTable.ajax.reload( function () {
-									load_status_toggle();
-//								});
+								facultyTable.ajax.reload();
 								
 							}
 						});

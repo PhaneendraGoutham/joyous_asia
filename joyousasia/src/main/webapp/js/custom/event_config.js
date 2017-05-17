@@ -15,16 +15,16 @@ $(document)
 						"bAutoWidth" : false,
 						"sPaginationType" : "full_numbers",
 						"sAjaxSource" : "ajax_event_list"+$("#SPRING_EXT").html(),
+						"drawCallback": function( settings ) {
+								load_status_toggle();
+					    },
 						"columnDefs": [
 									    {
 									        "targets": [0],
 									        "visible": false,
 									        "class":"hide_column"
 									    }
-						],
-						"initComplete": function( settings, json ) {
-							load_status_toggle();
-						}
+						]
 					});
 					
 					
@@ -58,9 +58,6 @@ $(document)
 							success : function(data) {
 								
 								alertNotification(data);
-								eventTable.ajax.reload( function () {
-									load_status_toggle();
-								});
 								
 							}
 						});
@@ -77,9 +74,7 @@ $(document)
 							success : function(data) {
 								
 								alertNotification(data);
-								eventTable.ajax.reload( function () {
-									load_status_toggle();
-								});
+								eventTable.ajax.reload();
 								
 								
 							}
